@@ -2,10 +2,8 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 const configFileName = ".gatorconfig.json"
@@ -32,7 +30,7 @@ func Read() *Config {
 		log.Printf("Error reading path: %s", err)
 	}
 
-	content, err := os.ReadFile(path + configFileName)
+	content, err := os.ReadFile(path + "/" + configFileName)
 	if err != nil {
 		log.Printf("Error reading file: %s", err)
 	}
@@ -47,21 +45,10 @@ func Read() *Config {
 }
 
 func getConfigFilePath() (string, error) {
-	dir, err := os.UserHomeDir()
-	if err != nil {
-		log.Printf("Error: %s", err)
-	}
-	log.Printf("dir: %s", dir)
-
-	wd, err := os.Getwd()
+	pwd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	parent := fmt.Sprintf("%s/feeds/", filepath.Dir(wd))
 
-	return parent, nil
-}
-
-func write(cfg Config) error {
-	return nil
+	return pwd, nil
 }
