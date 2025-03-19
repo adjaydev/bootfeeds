@@ -40,7 +40,6 @@ func Read() *Config {
 	if err != nil {
 		log.Printf("error unmarshaling JSON: %s", err)
 	}
-
 	return &cfg
 }
 
@@ -49,6 +48,5 @@ func getConfigFilePath() (string, error) {
 	if err != nil {
 		panic(err)
 	}
-
 	return pwd, nil
 }
