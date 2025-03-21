@@ -21,7 +21,12 @@ func (c *Config) SetUser(u string) {
 		log.Printf("Error writing json: %s", err)
 	}
 
-	os.WriteFile(configFileName, content, 0644)
+	path, err := getConfigFilePath()
+	if err != nil {
+		log.Printf("Error reading path: %s", err)
+	}
+
+	os.WriteFile(path+"/"+configFileName, content, 0644)
 }
 
 func Read() *Config {
@@ -40,11 +45,12 @@ func Read() *Config {
 	if err != nil {
 		log.Printf("error unmarshaling JSON: %s", err)
 	}
+
 	return &cfg
 }
 
 func getConfigFilePath() (string, error) {
-	pwd, err := os.Getwd()
+	pwd, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}

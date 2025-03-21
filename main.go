@@ -2,33 +2,31 @@ package main
 
 import (
 	"bootfeeds/internal/config"
-	"fmt"
+	"bootfeeds/internal/handlers"
+	"log"
+	"os"
 )
 
-type state struct {
-	cfg *config.Config
-}
-
-type command struct {
-	name string
-	cmd  []string
-}
-
-type commands struct {
-	commands map[string]func(*state, command) error
-}
-
-func (s *state) handlerLogin(cmd command) error {
-	if len(cmd.cmd) == 0 {
-		return fmt.Errorf("No command given.")
-	}
-	s.cfg.SetUser(cmd.name)
-	fmt.Printf("User %s was set.", cmd.name)
-	return nil
-}
-
 func main() {
+
 	cfg := config.Read()
-	cfg.SetUser("jay")
-	fmt.Println(cfg.DbUrl)
+	s := config.State{Cfg: cfg}
+
+	var cmds config.Commands
+	cmds = config.Commands{
+		Commands: map[string]func(*config.State, config.Command) error{},
+	}
+
+	cmds.Register("login", handlers.LoginHandler)
+
+	if len(os.Args) < 2 {
+		log.Fatal("Not enough arguments.")
+		return
+	}
+
+	name := os.Args[1]
+	args := os.Args[2:]
+
+	cmds.Run(&s, config.Command{Name: name, Cmd: args})
+
 }
