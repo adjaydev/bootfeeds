@@ -4,9 +4,10 @@ import (
 	"bootfeeds/internal/config"
 	"bootfeeds/internal/database"
 	"bootfeeds/internal/handlers"
+	"context"
 	"database/sql"
+	"fmt"
 
-	// "database/sql"
 	"log"
 	"os"
 
@@ -22,7 +23,6 @@ func main() {
 		log.Fatal("Error connecting to the database.")
 		return
 	}
-
 	dbQueries := database.New(db)
 
 	s := config.State{Cfg: cfg, DB: dbQueries}
@@ -33,6 +33,14 @@ func main() {
 	}
 
 	cmds.Register("login", handlers.LoginHandler)
+	cmds.Register("register", handlers.RegisterHandler)
+	cmds.Register("reset", handlers.ResetHandler)
+	cmds.Register("users", handlers.GetUsersHandler)
+	cmds.Register("agg", handlers.FeedHandler)
+	cmds.Register("addfeed", middlewareLoggedIn(handlers.FeedAddHandler))
+	cmds.Register("feeds", handlers.FeedsHandler)
+	cmds.Register("follow", middlewareLoggedIn(handlers.FeedFollowsHandler))
+	cmds.Register("following", middlewareLoggedIn(handlers.FeedFollowingHandler))
 
 	if len(os.Args) < 2 {
 		log.Fatal("Not enough arguments.")
@@ -42,6 +50,19 @@ func main() {
 	name := os.Args[1]
 	args := os.Args[2:]
 
-	cmds.Run(&s, config.Command{Name: name, Cmd: args})
+	err = cmds.Run(&s, config.Command{Name: name, Cmd: args})
+	if err != nil {
+		log.Fatal(err)
+	}
 
+}
+
+func middlewareLoggedIn(handler func(s *config.State, cmd config.Command, user database.User) error) func(*config.State, config.Command) error {
+	return func(s *config.State, cmd config.Command) error {
+		u, err := s.DB.GetUser(context.Background(), s.Cfg.CurrentUserName)
+		if err != nil {
+			return fmt.Errorf("User not found.")
+		}
+		return handler(s, cmd, u)
+	}
 }
