@@ -16,4 +16,5 @@ SELECT
 FROM posts p
 JOIN feeds f ON f.id = p.feed_id
 JOIN users u ON f.user_id = u.id
-WHERE u.name = $1;
+WHERE u.name = $1
+LIMIT $2;
