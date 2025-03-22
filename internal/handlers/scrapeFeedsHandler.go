@@ -11,8 +11,6 @@ import (
 )
 
 func ScrapeFeedsHandler(s *config.State) error {
-
-	// delay := cmd.Cmd[0]
 	ctx := context.Background()
 
 	next, err := s.DB.GetNextFeedToFetch(ctx)
@@ -20,7 +18,7 @@ func ScrapeFeedsHandler(s *config.State) error {
 		return fmt.Errorf("Error fetching next feed.")
 	}
 
-	fmt.Printf("name: %s\nurl: %s\n", next.Name, next.Url)
+	fmt.Printf("\n\n[ %s ]\n[ %s ]\n\n", next.Name, next.Url)
 
 	s.DB.MarkFeedFetched(ctx, database.MarkFeedFetchedParams{
 		ID:        next.ID,
@@ -40,6 +38,7 @@ func ScrapeFeedsHandler(s *config.State) error {
 	for _, item := range items {
 		fmt.Printf("Title: %s\n", item.Title)
 	}
+	fmt.Println()
 
 	return nil
 }
