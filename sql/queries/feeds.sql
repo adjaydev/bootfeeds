@@ -59,3 +59,20 @@ USING feeds f
 WHERE ff.feed_id = f.id 
   AND ff.user_id = $1
   AND f.url = $2;
+
+
+-- name: MarkFeedFetched :exec
+UPDATE feeds
+SET updated_at = $1, last_fetched_at = $2
+WHERE id = $3;
+
+
+-- name: GetNextFeedToFetch :one
+SELECT
+    f.id,
+   f.name,
+   f.url,
+   f.last_fetched_at
+FROM feeds f
+ORDER BY last_fetched_at NULLS FIRST
+LIMIT 1;

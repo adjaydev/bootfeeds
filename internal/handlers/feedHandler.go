@@ -2,20 +2,29 @@ package handlers
 
 import (
 	"bootfeeds/internal/config"
-	"bootfeeds/internal/rss"
-	"context"
 	"fmt"
+	"log"
+	"time"
 )
 
 func FeedHandler(s *config.State, cmd config.Command) error {
-	url := "https://www.wagslane.dev/index.xml"
-	ctx := context.Background()
-	feed, err := rss.FetchFeed(ctx, url)
-	if err != nil {
-		return fmt.Errorf("%s", err)
+	if len(cmd.Cmd[0]) < 1 {
+		return fmt.Errorf("Invalid arguments. Need 1s/1m/1h.")
 	}
 
-	fmt.Print(feed)
+	timeBetweenRequests, err := time.ParseDuration(cmd.Cmd[0])
+	if err != nil {
+		return fmt.Errorf("Error parsing time_betwee_requests")
+	}
 
-	return nil
+	log.Printf("Collecting feeds every %s\n", timeBetweenRequests)
+
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <-ticker.C {
+		err := ScrapeFeedsHandler(s)
+		if err != nil {
+			return fmt.Errorf("Error scraping feeds %s\n", err)
+		}
+	}
+
 }

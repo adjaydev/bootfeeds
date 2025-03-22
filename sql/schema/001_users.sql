@@ -8,6 +8,3 @@ CREATE TABLE users (
 
 -- +goose Down
 DROP TABLE users;
-
--- postgres://localhost/gator
--- goose postgres "postgres://localhost/gator" up
